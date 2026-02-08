@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BME Pharma Website
 
-## Getting Started
+![BME Pharma Banner](public/logo.png)
 
-First, run the development server:
+A modern, responsive e-commerce web application built for BME Pharma using **Next.js 16**, **TypeScript**, and **Tailwind CSS**. This project features a robust product catalog, shopping cart functionality, wishlist management, and a seamless checkout process, all wrapped in a sleek, accessible UI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Features
+
+- **Modern Tech Stack**: Built with Next.js 16 (App Router), React 19, and TypeScript.
+- **Responsive Design**: Fully responsive layout optimized for mobile, tablet, and desktop.
+- **UI Components**: Utilizes **Shadcn UI** for accessible and customizable components.
+- **Theming**: Built-in Dark/Light mode support via `next-themes`.
+- **Localization**: Bilingual support for **English** and **Arabic** (RTL support).
+- **E-Commerce Functionality**:
+  - **Product Catalog**: Browse products with category filtering and sorting.
+  - **Product Details**: Detailed product pages with image galleries and related items.
+  - **Cart & Wishlist**: Persistent cart and wishlist state using local storage.
+  - **Checkout Flow**: Multi-step checkout process with shipping and payment method selection (COD, Visa, PayPal).
+- **Dynamic Routing**: SEO-friendly URL structure for products and categories.
+- **Toast Notifications**: Interactive feedback using `sonner`.
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Library**: [Shadcn UI](https://ui.shadcn.com/) / [Radix UI](https://www.radix-ui.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **State Management**: React Context API + Local Storage
+- **Charts**: [Recharts](https://recharts.org/)
+- **Carousel**: [Embla Carousel](https://www.embla-carousel.com/)
+
+## 📦 Getting Started
+
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- npm, yarn, pnpm, or **bun** (recommended)
+
+### Installation
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone https://github.com/pepoo202020/bme-website.git
+    cd bme-website
+    ```
+
+2.  **Install dependencies:**
+
+    ```bash
+    npm install
+    # or
+    yarn install
+    # or
+    pnpm install
+    # or
+    bun install
+    ```
+
+3.  **Run the development server:**
+
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    # or
+    pnpm dev
+    # or
+    bun dev
+    ```
+
+4.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 📂 Project Structure
+
+```
+src/
+├── app/                  # Next.js App Router pages and layouts
+│   ├── (marketing)/      # Public marketing pages (Home, Store, Checkout, etc.)
+│   ├── (dashboard)/      # Dashboard pages (Admin/User)
+│   └── layout.tsx        # Root layout
+├── components/           # Reusable React components
+│   ├── layout/           # Header, Footer, Sidebar
+│   ├── ui/               # Shadcn UI primitives
+│   ├── marketing/        # Landing page sections
+│   ├── store/            # Store specific components (Grid, Filters)
+│   ├── cart/             # Cart sheet and components
+│   ├── wishlist/         # Wishlist sheet
+│   └── checkout/         # Checkout form and steps
+├── context/              # React Context providers (Store, Currency, Language)
+├── data/                 # Static data and mock content
+├── lib/                  # Utility functions
+└── types/                # TypeScript interfaces and types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📜 Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `dev`: Starts the development server.
+- `build`: Builds the application for production.
+- `start`: Runs the built production application.
+- `lint`: Runs ESLint to catch code quality issues.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Contributing
 
-## Learn More
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-To learn more about Next.js, take a look at the following resources:
+1.  Fork the project
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
