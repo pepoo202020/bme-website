@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Eye, Heart, ShoppingCart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Product } from "@/types";
+import { Product, Currency } from "@/types";
 import { useCurrency } from "@/context/currency-context";
 import { useLanguage } from "@/context/language-context";
 import { useStore } from "@/context/store-context";
@@ -44,12 +44,16 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const isWishlisted = isInWishlist(product.id);
 
+  const discountedPrice = product.discount
+    ? product.price - product.price * (product.discount / 100)
+    : product.price;
+
   const getName = () => (language === "ar" ? product.name.ar : product.name.en);
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleWishlist(product.id);
+    toggleWishlist(product);
 
     if (!isWishlisted) {
       toast.success(t("product.addedToWishlist") || "Added to wishlist", {
@@ -148,15 +152,23 @@ export function ProductCard({ product }: ProductCardProps) {
                           {getName()}
                         </DialogTitle>
                       </div>
-                      <span className="text-xl font-bold text-primary whitespace-nowrap">
-                        {formatPrice(product.price)}
-                      </span>
+                      <div className="flex font-space flex-col mt-auto items-start">
+                        {discountedPrice < product.price ? (
+                          <>
+                            <span className="text-xl font-bold text-slate-900 group-hover:text-primary transition-colors">
+                              {formatPrice(discountedPrice, product.currency)}
+                            </span>
+                            <span className="text-sm text-slate-500 line-through">
+                              {formatPrice(product.price, product.currency)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-xl font-bold text-slate-900 group-hover:text-primary transition-colors">
+                            {formatPrice(product.price, product.currency)}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <DialogDescription className="text-base mt-2">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua.
-                    </DialogDescription>
                   </DialogHeader>
 
                   <div className="mt-auto pt-6 border-t flex items-center justify-between gap-4">
@@ -180,7 +192,7 @@ export function ProductCard({ product }: ProductCardProps) {
                           ? "text-destructive border-destructive/20 bg-destructive/5"
                           : ""
                       }
-                      onClick={() => toggleWishlist(product.id)}
+                      onClick={() => toggleWishlist(product)}
                     >
                       <Heart
                         className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`}
@@ -245,9 +257,22 @@ export function ProductCard({ product }: ProductCardProps) {
         </Link>
 
         <div className="mt-auto pt-2 flex items-center justify-between border-t border-border/50">
-          <span className="font-bold text-lg text-primary">
-            {formatPrice(product.price)}
-          </span>
+          <div className="flex font-space flex-col items-start translate-y-1">
+            {discountedPrice < product.price ? (
+              <div className="flex items-baseline gap-2">
+                <span className="font-bold text-lg text-primary">
+                  {formatPrice(discountedPrice, product.currency)}
+                </span>
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatPrice(product.price, product.currency)}
+                </span>
+              </div>
+            ) : (
+              <span className="font-bold text-lg text-primary">
+                {formatPrice(product.price, product.currency)}
+              </span>
+            )}
+          </div>
           <Button
             size="sm"
             variant="ghost"

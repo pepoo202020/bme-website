@@ -2,17 +2,26 @@
 
 import { useLanguage } from "@/context/language-context";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import type { CompanyInfo } from "@/generated/prisma/client";
 
-export function ContactInfo() {
-  const { t, language } = useLanguage();
+type ContactInfoProps = {
+  companyInfo?: CompanyInfo | null;
+};
+
+export function ContactInfo({ companyInfo }: ContactInfoProps) {
+  const { language } = useLanguage();
 
   const contactDetails = [
     {
       icon: MapPin,
       title: { en: "Office Address", ar: "عنوان المكتب" },
       value: {
-        en: "123 Pharmacy Street, Medical District, Cairo, Egypt",
-        ar: "١٢٣ شارع الصيدلة، الحي الطبي، القاهرة، مصر",
+        en:
+          companyInfo?.english_address ||
+          "123 Pharmacy Street, Medical District, Cairo, Egypt",
+        ar:
+          companyInfo?.arabic_address ||
+          "١٢٣ شارع الصيدلة، الحي الطبي، القاهرة، مصر",
       },
       color: "text-blue-500",
       bg: "bg-blue-500/10",
@@ -20,21 +29,30 @@ export function ContactInfo() {
     {
       icon: Phone,
       title: { en: "Phone Number", ar: "رقم الهاتف" },
-      value: { en: "+20 123 456 7890", ar: "+٢٠ ١٢٣ ٤٥٦ ٧٨٩٠" },
+      value: {
+        en: companyInfo?.phone || "+20 123 456 7890",
+        ar: companyInfo?.phone || "+٢٠ ١٢٣ ٤٥٦ ٧٨٩٠",
+      },
       color: "text-green-500",
       bg: "bg-green-500/10",
     },
     {
       icon: Mail,
       title: { en: "Email Address", ar: "البريد الإلكتروني" },
-      value: { en: "info@bmepharma.com", ar: "info@bmepharma.com" },
+      value: {
+        en: companyInfo?.email || "info@bmepharma.com",
+        ar: companyInfo?.email || "info@bmepharma.com",
+      },
       color: "text-purple-500",
       bg: "bg-purple-500/10",
     },
     {
       icon: Clock,
       title: { en: "Working Hours", ar: "ساعات العمل" },
-      value: { en: "Sun - Thu: 9AM - 5PM", ar: "الأحد - الخميس: ٩ ص - ٥ م" },
+      value: {
+        en: companyInfo?.english_workingDays || "Sun - Thu: 9AM - 5PM",
+        ar: companyInfo?.arabic_workingDays || "الأحد - الخميس: ٩ ص - ٥ م",
+      },
       color: "text-orange-500",
       bg: "bg-orange-500/10",
     },

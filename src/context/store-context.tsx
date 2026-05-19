@@ -9,11 +9,12 @@ export interface CartItem extends Product {
 
 interface StoreContextType {
   cart: CartItem[];
-  wishlist: string[]; // Product IDs
+  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
+  wishlist: Product[]; // Changed from string[] to Product[]
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
-  toggleWishlist: (productId: string) => void;
+  toggleWishlist: (product: Product) => void;
   isInWishlist: (productId: string) => boolean;
   cartCount: number;
   wishlistCount: number;
@@ -28,7 +29,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [wishlist, setWishlist] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -48,7 +49,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     if (storedWishlist) {
       try {
-        setWishlist(JSON.parse(storedWishlist));
+        const parsed = JSON.parse(storedWishlist);
+        if (Array.isArray(parsed)) {
+          // Filter out legacy string IDs and only keep actual product objects
+          const validWishlist = parsed.filter(
+            (item) => typeof item === "object" && item !== null && "id" in item,
+          );
+          setWishlist(validWishlist);
+        }
       } catch (e) {
         console.error("Failed to parse wishlist from local storage", e);
       }
@@ -75,7 +83,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (existingItem) {
         return prevCart.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...product, quantity: item.quantity + 1 }
             : item,
         );
       } else {
@@ -100,31 +108,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const toggleWishlist = (productId: string) => {
+  const toggleWishlist = (product: Product) => {
     setWishlist((prevWishlist) => {
-      if (prevWishlist.includes(productId)) {
-        return prevWishlist.filter((id) => id !== productId);
+      const exists = prevWishlist.some((p) => p.id === product.id);
+      if (exists) {
+        return prevWishlist.filter((p) => p.id !== product.id);
       } else {
-        return [...prevWishlist, productId];
+        return [...prevWishlist, product];
       }
     });
   };
 
   const isInWishlist = (productId: string) => {
-    return wishlist.includes(productId);
+    return wishlist.some((p) => p.id === productId);
   };
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const wishlistCount = wishlist.length;
-  const cartTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
-  );
+  const cartTotal = cart.reduce((total, item) => {
+    const itemPrice = item.discount
+      ? item.price - item.price * (item.discount / 100)
+      : item.price;
+    return total + itemPrice * item.quantity;
+  }, 0);
 
   return (
     <StoreContext.Provider
       value={{
         cart,
+        setCart,
         wishlist,
         addToCart,
         removeFromCart,

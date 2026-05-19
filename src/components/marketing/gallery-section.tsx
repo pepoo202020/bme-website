@@ -1,61 +1,95 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLanguage } from "@/context/language-context";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Eye, ArrowRight } from "lucide-react";
+import type {
+  GallerySectionConfig,
+  GalleryImage,
+} from "@/generated/prisma/client";
 
-// Mock images with different aspect ratios
-const galleryImages = [
+type GallerySectionProps = {
+  gallerySectionConfig?: GallerySectionConfig | null;
+  selectedImages?: GalleryImage[];
+};
+
+// Default fallback images
+const defaultImages = [
   {
-    src: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=800&auto=format&fit=crop",
+    id: 1,
+    url: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=800&auto=format&fit=crop",
     alt: "Laboratory Research",
-    aspectRatio: "aspect-[4/3]",
   },
   {
-    src: "https://images.unsplash.com/photo-1576091160550-21733e99dbb9?q=80&w=800&auto=format&fit=crop",
+    id: 2,
+    url: "https://images.unsplash.com/photo-1576091160550-21733e99dbb9?q=80&w=800&auto=format&fit=crop",
     alt: "Quality Control",
-    aspectRatio: "aspect-[3/4]",
   },
   {
-    src: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=800&auto=format&fit=crop",
+    id: 3,
+    url: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=800&auto=format&fit=crop",
     alt: "Global Distribution",
-    aspectRatio: "aspect-square",
   },
   {
-    src: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=800&auto=format&fit=crop",
+    id: 4,
+    url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=800&auto=format&fit=crop",
     alt: "Pharmaceutical Products",
-    aspectRatio: "aspect-[3/4]",
   },
   {
-    src: "https://images.unsplash.com/photo-1556228720-19875c4b223d?q=80&w=800&auto=format&fit=crop",
+    id: 5,
+    url: "https://images.unsplash.com/photo-1556228720-19875c4b223d?q=80&w=800&auto=format&fit=crop",
     alt: "Customer Care",
-    aspectRatio: "aspect-[4/3]",
   },
   {
-    src: "https://images.unsplash.com/photo-1556228578-8d8442c55e41?q=80&w=800&auto=format&fit=crop",
+    id: 6,
+    url: "https://images.unsplash.com/photo-1556228578-8d8442c55e41?q=80&w=800&auto=format&fit=crop",
     alt: "Expert Team",
-    aspectRatio: "aspect-square",
   },
 ];
 
-export function GallerySection() {
-  const { t, language } = useLanguage();
-  const [selectedImage, setSelectedImage] = useState<
-    (typeof galleryImages)[0] | null
-  >(null);
+export const GallerySection = ({
+  gallerySectionConfig,
+  selectedImages,
+}: GallerySectionProps) => {
+  const { language } = useLanguage();
+
+  const header = gallerySectionConfig
+    ? language === "ar"
+      ? gallerySectionConfig.arabic_header
+      : gallerySectionConfig.english_header
+    : language === "ar"
+      ? "معرض الصور"
+      : "Our Gallery";
+
+  const description = gallerySectionConfig
+    ? language === "ar"
+      ? gallerySectionConfig.arabic_description
+      : gallerySectionConfig.english_description
+    : language === "ar"
+      ? "إلق نظرة على مرافقنا ومنتجاتنا وفريقنا وهو يعمل."
+      : "Take a look at our facilities, products, and our team in action.";
+
+  const images =
+    selectedImages && selectedImages.length > 0
+      ? selectedImages.map((img) => ({
+          id: img.id,
+          url: img.url,
+          alt: img.alt || "Gallery image",
+        }))
+      : defaultImages;
 
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-0">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-3xl font-bold tracking-tight mb-4 text-foreground">
-            {t("section.galleryTitle") ||
-              (language === "ar" ? "معرض الصور" : "Our Gallery")}
+            {header || (language === "ar" ? "معرض الصور" : "Our Gallery")}
           </h2>
           <p className="text-muted-foreground text-lg">
-            {t("section.galleryDesc") ||
+            {description ||
               (language === "ar"
                 ? "إلق نظرة على مرافقنا ومنتجاتنا وفريقنا وهو يعمل."
                 : "Take a look at our facilities, products, and our team in action.")}
@@ -64,20 +98,22 @@ export function GallerySection() {
 
         {/* Masonry Grid */}
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
-          {galleryImages.map((image, index) => (
-            <div key={index} className="break-inside-avoid">
+          {images.map((image) => (
+            <div key={image.id} className="break-inside-avoid">
               <Dialog>
                 <DialogTrigger asChild>
                   <div
                     className="group relative overflow-hidden rounded-xl cursor-pointer"
-                    onClick={() => setSelectedImage(image)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View ${image.alt}`}
                   >
                     <Image
-                      src={image.src}
+                      src={image.url}
                       alt={image.alt}
                       width={800}
-                      height={600} // Aspect ratio handled by class or layout, but width/height needed for Next/Image
-                      className={`w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110`}
+                      height={600}
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110"
                     />
 
                     {/* Overlay */}
@@ -91,7 +127,7 @@ export function GallerySection() {
                 <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
                   <div className="relative w-full h-[80vh]">
                     <Image
-                      src={image.src}
+                      src={image.url}
                       alt={image.alt}
                       fill
                       className="object-contain"
@@ -102,7 +138,17 @@ export function GallerySection() {
             </div>
           ))}
         </div>
+
+        {/* Show More Button */}
+        <div className="text-center mt-10">
+          <Button asChild variant="outline" size="lg" className="gap-2">
+            <Link href="/gallery">
+              {language === "ar" ? "عرض المزيد" : "Show More"}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   );
-}
+};

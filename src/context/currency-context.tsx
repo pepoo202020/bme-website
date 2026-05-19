@@ -6,7 +6,7 @@ import { Currency } from "@/types";
 interface CurrencyContextType {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
-  formatPrice: (priceInUSD: number) => string;
+  formatPrice: (price: number, baseCurrency?: Currency) => string;
   exchangeRate: number;
 }
 
@@ -31,18 +31,31 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("currency", newCurrency);
   };
 
-  const formatPrice = (priceInUSD: number) => {
-    if (currency === "USD") {
+  const formatPrice = (price: number, baseCurrency: Currency = "USD") => {
+    // If user's selected site currency is the same as the product's base currency, no conversion needed.
+    if (currency === baseCurrency) {
       return new Intl.NumberFormat("en-US", {
         style: "currency",
-        currency: "USD",
-      }).format(priceInUSD);
-    } else {
+        currency: currency,
+      }).format(price);
+    }
+    // If site is EGP but product is USD -> multiply
+    else if (currency === "EGP" && baseCurrency === "USD") {
       return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "EGP",
-      }).format(priceInUSD * EXCHANGE_RATE);
+      }).format(price * EXCHANGE_RATE);
     }
+    // If site is USD but product is EGP -> divide
+    else if (currency === "USD" && baseCurrency === "EGP") {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(price / EXCHANGE_RATE);
+    }
+
+    // Fallback (shouldn't be reached)
+    return `${price} ${baseCurrency}`;
   };
 
   return (

@@ -1,31 +1,27 @@
-"use client";
+import { getGalleryImages } from "@/actions/gallery-actions";
+import {
+  getGalleryPage,
+  getGalleryCategories,
+} from "@/actions/gallery-page-actions";
+import { GalleryClientPage } from "./gallery-client-page";
 
-import { useLanguage } from "@/context/language-context";
-import { FullGallery } from "@/components/gallery/full-gallery";
+export default async function GalleryPage() {
+  const [galleryRes, pageRes, categoriesRes] = await Promise.all([
+    getGalleryImages(),
+    getGalleryPage(),
+    getGalleryCategories(),
+  ]);
 
-export default function GalleryPage() {
-  const { t, language } = useLanguage();
+  const images = galleryRes.success && galleryRes.data ? galleryRes.data : [];
+  const pageDetails = pageRes.success && pageRes.data ? pageRes.data : null;
+  const categories =
+    categoriesRes.success && categoriesRes.data ? categoriesRes.data : [];
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Page Header */}
-      <div className="bg-muted py-12 md:py-16 mb-8">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">
-            {t("header.gallery") ||
-              (language === "ar" ? "معرض الصور" : "Media Gallery")}
-          </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            {language === "ar"
-              ? "استكشف لحظاتنا، ومرافقنا، ومنتجاتنا من خلال عدسة الكاميرا."
-              : "Explore our moments, facilities, and products through our lens."}
-          </p>
-        </div>
-      </div>
-
-      <main className="container mx-auto px-4 flex-1 pb-16">
-        <FullGallery />
-      </main>
-    </div>
+    <GalleryClientPage
+      initialImages={images as any}
+      pageDetails={pageDetails}
+      categories={categories as any}
+    />
   );
 }

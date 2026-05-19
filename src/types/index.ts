@@ -14,7 +14,8 @@ export interface NavItem {
 export interface Product {
   id: string;
   name: { en: string; ar: string };
-  price: number; // Base price in USD
+  price: number; // Base price
+  currency?: Currency; // Base currency (USD or EGP)
   discount?: number; // Discount percentage
   image: string; // Main image
   images?: string[]; // Gallery images

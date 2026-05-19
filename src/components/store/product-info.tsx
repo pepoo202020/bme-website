@@ -6,21 +6,23 @@ import { useCurrency } from "@/context/currency-context";
 import { useStore } from "@/context/store-context";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
-// import { Heading } from "@/components/ui/heading"; // Removed unused import
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Star, Heart, ShoppingCart, Minus, Plus, Share2 } from "lucide-react";
+import { Minus, Plus, Heart } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 interface ProductInfoProps {
   product: Product;
 }
 
-export function ProductInfo({ product }: ProductInfoProps) {
+export const ProductInfo = ({ product }: ProductInfoProps) => {
   const { t, language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const { addToCart, toggleWishlist, isInWishlist } = useStore();
+  const {
+    addToCart,
+    toggleWishlist,
+    isInWishlist,
+    setIsCartOpen,
+    setIsWishlistOpen,
+  } = useStore();
   const [quantity, setQuantity] = useState(1);
 
   const isWishlisted = isInWishlist(product.id);
@@ -38,153 +40,155 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const discountedPrice = price - (price * discount) / 100;
 
   const handleAddToCart = () => {
-    if (quantity > stock) {
+    if (quantity > stock && !isOutOfStock) {
       toast.error(
         t("product.outOfStock") || "Cannot add more than available stock",
       );
       return;
     }
-    // We might need to update addToCart to accept quantity in the future,
-    // for now we loop or just add once.
-    // Assuming context handles quantity aggregation or we call it multiple times.
-    // For simplicity with current context, we just add the product.
-    // Ideally, update the context to accept quantity.
-    // Simulating multiple adds:
     for (let i = 0; i < quantity; i++) {
       addToCart(product);
     }
-    toast.success(t("product.addedToCart") || "Added to cart");
+    toast.success(t("product.addedToCart") || "Added to cart", {
+      description: getName(),
+      action: {
+        label: t("header.cart") || "View Cart",
+        onClick: () => setIsCartOpen(true),
+      },
+    });
+  };
+
+  const handleToggleWishlist = () => {
+    toggleWishlist(product.id);
+    if (!isWishlisted) {
+      toast.success(t("product.addedToWishlist") || "Added to favorites", {
+        description: getName(),
+        action: {
+          label: t("header.wishlist") || "View Wishlist",
+          onClick: () => setIsWishlistOpen(true),
+        },
+      });
+    } else {
+      toast.info(t("product.removedFromWishlist") || "Removed from favorites", {
+        description: getName(),
+      });
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">{getName()}</h1>
-        <div className="flex items-center gap-4 text-sm">
-          {/* Stars */}
-          <div className="flex items-center text-yellow-500">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={cn(
-                  "w-4 h-4",
-                  i < (product.rating || 0) ? "fill-current" : "text-muted",
-                )}
-              />
-            ))}
-          </div>
-          <span className="text-muted-foreground">
-            ({product.reviews || 0}{" "}
-            {t("product.reviews") || (language === "ar" ? "مراجعة" : "Reviews")}
-            )
-          </span>
-          <Separator orientation="vertical" className="h-4" />
-          <span
-            className={cn(
-              "font-medium",
-              isOutOfStock ? "text-destructive" : "text-green-600",
-            )}
-          >
-            {isOutOfStock
-              ? language === "ar"
-                ? "نفذت الكمية"
-                : "Out of Stock"
-              : language === "ar"
-                ? "متوفر"
-                : "In Stock"}
-          </span>
-        </div>
+    <div className="flex flex-col gap-5 py-2">
+      {/* Availability */}
+      <div className="text-sm font-semibold text-foreground">
+        {language === "ar" ? "التوفر:" : "Availability:"}{" "}
+        <span
+          className={
+            isOutOfStock ? "text-destructive italic" : "text-primary italic"
+          }
+        >
+          {isOutOfStock
+            ? language === "ar"
+              ? "نفذت الكمية"
+              : "Out of Stock"
+            : language === "ar"
+              ? "متوفر"
+              : "In Stock"}
+        </span>
       </div>
 
-      <div className="flex items-baseline gap-4">
-        <span className="text-3xl font-bold text-primary">
-          {formatPrice(discountedPrice)}
+      {/* Product Title */}
+      <h1 className="text-2xl md:text-3xl font-extrabold text-foreground leading-tight">
+        {getName()}
+        {discount > 0 &&
+          ` - ${discount}% ${language === "ar" ? "خصم" : "Discount"}`}
+      </h1>
+
+      {/* Prices */}
+      <div className="flex items-baseline gap-3">
+        <span className="text-xl font-bold text-primary">
+          {formatPrice(discountedPrice, product.currency)}
         </span>
         {discount > 0 && (
-          <>
-            <span className="text-xl text-muted-foreground line-through">
-              {formatPrice(price)}
-            </span>
-            <Badge variant="destructive">-{discount}%</Badge>
-          </>
+          <span className="text-base text-muted-foreground line-through">
+            {formatPrice(price, product.currency)}
+          </span>
         )}
       </div>
 
-      <div className="text-muted-foreground leading-relaxed">
-        {getDescription()}
+      {/* Description */}
+      <div>
+        <h3 className="text-base font-bold italic text-foreground mb-1">
+          {language === "ar" ? "الوصف" : "Description"}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {getDescription()}
+        </p>
       </div>
 
-      {product.sku && (
-        <div className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">
-            {language === "ar" ? "رمز المنتج (SKU):" : "SKU:"}
-          </span>{" "}
-          {product.sku}
-        </div>
-      )}
+      {/* Quantity */}
+      <div className="flex items-center gap-4">
+        <span className="text-base font-bold italic text-foreground">
+          {language === "ar" ? "الكمية" : "Quantity"}
+        </span>
+        <button
+          type="button"
+          aria-label="Decrease quantity"
+          tabIndex={0}
+          disabled={quantity <= 1 || isOutOfStock}
+          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+          className="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xl font-bold transition-colors hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <Minus className="w-4 h-4" />
+        </button>
+        <span className="w-10 text-center text-lg font-semibold tabular-nums">
+          {quantity}
+        </span>
+        <button
+          type="button"
+          aria-label="Increase quantity"
+          tabIndex={0}
+          disabled={(stock > 0 && quantity >= stock) || isOutOfStock}
+          onClick={() =>
+            setQuantity((q) => (stock > 0 ? Math.min(stock, q + 1) : q + 1))
+          }
+          className="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xl font-bold transition-colors hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
 
-      <Separator />
-
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Quantity */}
-        <div className="flex items-center border rounded-md">
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={quantity <= 1 || isOutOfStock}
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          >
-            <Minus className="w-4 h-4" />
-          </Button>
-          <span className="w-12 text-center font-medium">{quantity}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={quantity >= stock || isOutOfStock}
-            onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Add to Cart */}
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <Button
           size="lg"
-          className="flex-1 gap-2"
           disabled={isOutOfStock}
           onClick={handleAddToCart}
+          className="flex-1 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-6"
         >
-          <ShoppingCart className="w-5 h-5" />
           {t("product.addToCart") ||
-            (language === "ar" ? "أضف للسلة" : "Add to Cart")}
+            (language === "ar" ? "أضف للسلة" : "Add To Cart")}
         </Button>
-
-        {/* Wishlist */}
         <Button
+          size="lg"
           variant="outline"
-          size="icon"
-          className={cn(
-            "h-11 w-11",
-            isWishlisted &&
-              "text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600",
-          )}
-          onClick={() => {
-            toggleWishlist(product.id);
-            toast.success(
-              isWishlisted ? "Removed from wishlist" : "Added to wishlist",
-            );
-          }}
+          onClick={handleToggleWishlist}
+          className={`rounded-full font-bold text-base py-6 border-2 ${
+            isWishlisted
+              ? "border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
+              : "border-muted-foreground/30 text-foreground hover:bg-muted"
+          }`}
         >
-          <Heart className={cn("w-5 h-5", isWishlisted && "fill-current")} />
+          <Heart
+            className={`w-4 h-4 mr-2 ${isWishlisted ? "fill-current" : ""}`}
+          />
+          {isWishlisted
+            ? language === "ar"
+              ? "في المفضلة"
+              : "In Favorites"
+            : language === "ar"
+              ? "أضف للمفضلة"
+              : "Add To Favorites"}
         </Button>
-      </div>
-
-      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
-        <Share2 className="w-4 h-4" />
-        <span>
-          {language === "ar" ? "مشاركة هذا المنتج" : "Share this product"}
-        </span>
       </div>
     </div>
   );
-}
+};

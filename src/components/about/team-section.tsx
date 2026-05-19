@@ -2,9 +2,25 @@
 
 import { useLanguage } from "@/context/language-context";
 import Image from "next/image";
+import type { AboutTeamMember, AboutHeroItem } from "@/generated/prisma/client";
 
-// Mock Team Data
-const teamMembers = [
+// ── Types ──
+
+type PersonItem = {
+  id: number;
+  image: string | null;
+  name: { en: string; ar: string };
+  role: { en: string; ar: string };
+};
+
+type TeamSectionProps = {
+  title?: { en: string; ar: string };
+  description?: { en: string; ar: string };
+  members?: AboutTeamMember[] | AboutHeroItem[] | null;
+};
+
+// Default mock data
+const defaultMembers: PersonItem[] = [
   {
     id: 1,
     name: { en: "Dr. Ahmed Hassan", ar: "د. أحمد حسن" },
@@ -35,40 +51,105 @@ const teamMembers = [
   },
 ];
 
-export function TeamSection() {
+const isTeamMember = (
+  item: AboutTeamMember | AboutHeroItem,
+): item is AboutTeamMember => {
+  return "arabic_name" in item;
+};
+
+export const TeamSection = ({
+  title,
+  description,
+  members,
+}: TeamSectionProps) => {
   const { t, language } = useLanguage();
+
+  const sectionTitle = title
+    ? language === "ar"
+      ? title.ar
+      : title.en
+    : t("about.teamTitle") || (language === "ar" ? "أبطالنا" : "Our Heroes");
+
+  const sectionDesc = description
+    ? language === "ar"
+      ? description.ar
+      : description.en
+    : t("about.teamDesc") ||
+      (language === "ar"
+        ? "تعرف على الفريق المتميز الذي يقود ابتكاراتنا ونجاحنا."
+        : "Meet the dedicated team driving our innovation and success.");
+
+  // Normalize DB members or use defaults
+  const normalizedMembers: PersonItem[] =
+    members && members.length > 0
+      ? members.map((m) => {
+          if (isTeamMember(m)) {
+            return {
+              id: m.id,
+              image: m.image,
+              name: {
+                en: m.english_name || "",
+                ar: m.arabic_name || "",
+              },
+              role: {
+                en: m.english_title || "",
+                ar: m.arabic_title || "",
+              },
+            };
+          }
+          // AboutHeroItem mapping fallback
+          const heroItem = m as AboutHeroItem;
+          return {
+            id: heroItem.id,
+            image: heroItem.image,
+            name: {
+              en: "",
+              ar: "",
+            },
+            role: {
+              en: "",
+              ar: "",
+            },
+          };
+        })
+      : defaultMembers;
 
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-0">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight mb-4">
-            {t("about.teamTitle") ||
-              (language === "ar" ? "أبطالنا" : "Our Heroes")}
+            {sectionTitle}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            {t("about.teamDesc") ||
-              (language === "ar"
-                ? "تعرف على الفريق المتميز الذي يقود ابتكاراتنا ونجاحنا."
-                : "Meet the dedicated team driving our innovation and success.")}
+            {sectionDesc}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teamMembers.map((member) => (
+        <div className="flex flex-wrap justify-center gap-8">
+          {normalizedMembers.map((member) => (
             <div key={member.id} className="group text-center">
               <div className="relative w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden border-4 border-muted group-hover:border-primary transition-colors">
-                <Image
-                  src={member.image}
-                  alt={language === "ar" ? member.name.ar : member.name.en}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                {member.image ? (
+                  <Image
+                    src={member.image}
+                    alt={language === "ar" ? member.name.ar : member.name.en}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-3xl font-bold">
+                    {(language === "ar"
+                      ? member.name.ar
+                      : member.name.en
+                    ).charAt(0) || "?"}
+                  </div>
+                )}
               </div>
               <h3 className="text-xl font-bold mb-1">
                 {language === "ar" ? member.name.ar : member.name.en}
               </h3>
-              <p className="text-primary font-medium">
+              <p className="text-sm text-muted-foreground">
                 {language === "ar" ? member.role.ar : member.role.en}
               </p>
             </div>
@@ -77,4 +158,4 @@ export function TeamSection() {
       </div>
     </section>
   );
-}
+};

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -66,9 +66,21 @@ export function CartSheet() {
                   <h4 className="font-medium line-clamp-1">
                     {language === "ar" ? item.name.ar : item.name.en}
                   </h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {formatPrice(item.price)}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm font-semibold text-primary">
+                      {formatPrice(
+                        item.discount
+                          ? item.price - item.price * (item.discount / 100)
+                          : item.price,
+                        item.currency,
+                      )}
+                    </p>
+                    {!!item.discount && item.discount > 0 && (
+                      <p className="text-xs text-muted-foreground line-through">
+                        {formatPrice(item.price, item.currency)}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center border rounded-md h-8">
@@ -118,7 +130,9 @@ export function CartSheet() {
             <span className="text-muted-foreground">
               {language === "ar" ? "المجموع الفرعي" : "Subtotal"}
             </span>
-            <span className="font-medium">{formatPrice(cartTotal)}</span>
+            <span className="font-medium">
+              {formatPrice(cartTotal, cart[0]?.currency)}
+            </span>
           </div>
           <div className="flex items-center justify-between text-muted-foreground text-sm">
             <span>{language === "ar" ? "الشحن" : "Shipping"}</span>
@@ -130,7 +144,7 @@ export function CartSheet() {
         <Separator />
         <div className="flex items-center justify-between font-bold text-lg">
           <span>{language === "ar" ? "المجموع الكلي" : "Total"}</span>
-          <span>{formatPrice(cartTotal)}</span>
+          <span>{formatPrice(cartTotal, cart[0]?.currency)}</span>
         </div>
         <Button
           className="w-full"

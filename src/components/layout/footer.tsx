@@ -13,7 +13,14 @@ import {
   MapPin,
 } from "lucide-react";
 
-export function Footer() {
+import type { Category, CompanyInfo } from "@/generated/prisma/client";
+
+interface FooterProps {
+  categories?: Category[];
+  companyInfo?: CompanyInfo | null;
+}
+
+export function Footer({ categories = [], companyInfo }: FooterProps) {
   const { t, language } = useLanguage();
 
   const currentYear = new Date().getFullYear();
@@ -44,48 +51,62 @@ export function Footer() {
                   : "Dedicated to providing high-quality pharmaceutical products to improve lives. Your trust is our priority.")}
             </p>
             <div className="flex gap-4">
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-5 w-5" />
-              </Link>
+              {companyInfo?.facebook && (
+                <Link
+                  href={companyInfo.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="h-5 w-5" />
+                </Link>
+              )}
+              {companyInfo?.twitter && (
+                <Link
+                  href={companyInfo.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Twitter"
+                >
+                  <Twitter className="h-5 w-5" />
+                </Link>
+              )}
+              {companyInfo?.instagram && (
+                <Link
+                  href={companyInfo.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="h-5 w-5" />
+                </Link>
+              )}
+              {companyInfo?.linkedin && (
+                <Link
+                  href={companyInfo.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="h-5 w-5" />
+                </Link>
+              )}
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
             <h3 className="font-semibold text-foreground mb-4">
-              {t("footer.quickLinks") ||
-                (language === "ar" ? "روابط سريعة" : "Quick Links")}
+              {language === "ar" ? "روابط سريعة" : "Quick Links"}
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/" className="hover:text-primary transition-colors">
-                  {t("header.home") ||
-                    (language === "ar" ? "الرئيسية" : "Home")}
+                  {language === "ar" ? "الرئيسية" : "Home"}
                 </Link>
               </li>
               <li>
@@ -93,8 +114,7 @@ export function Footer() {
                   href="#about-us"
                   className="hover:text-primary transition-colors"
                 >
-                  {t("header.about") ||
-                    (language === "ar" ? "من نحن" : "About Us")}
+                  {language === "ar" ? "من نحن" : "About Us"}
                 </Link>
               </li>
               <li>
@@ -102,8 +122,7 @@ export function Footer() {
                   href="#store"
                   className="hover:text-primary transition-colors"
                 >
-                  {t("header.store") ||
-                    (language === "ar" ? "المتجر" : "Store")}
+                  {language === "ar" ? "المتجر" : "Store"}
                 </Link>
               </li>
               <li>
@@ -111,38 +130,7 @@ export function Footer() {
                   href="#contact"
                   className="hover:text-primary transition-colors"
                 >
-                  {t("header.contact") ||
-                    (language === "ar" ? "اتصل بنا" : "Contact")}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">
-              {t("footer.categories") ||
-                (language === "ar" ? "الأقسام" : "Categories")}
-            </h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link href="#" className="hover:text-primary transition-colors">
-                  {language === "ar" ? "الأدوية" : "Medications"}
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary transition-colors">
-                  {language === "ar" ? "المعدات الطبية" : "Medical Equipment"}
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary transition-colors">
-                  {language === "ar" ? "العناية الشخصية" : "Personal Care"}
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary transition-colors">
-                  {language === "ar" ? "المكملات الغذائية" : "Supplements"}
+                  {language === "ar" ? "اتصل بنا" : "Contact"}
                 </Link>
               </li>
             </ul>
@@ -151,25 +139,28 @@ export function Footer() {
           {/* Contact Info */}
           <div>
             <h3 className="font-semibold text-foreground mb-4">
-              {t("footer.contact") ||
-                (language === "ar" ? "معلومات التواصل" : "Contact Info")}
+              {language === "ar" ? "معلومات التواصل" : "Contact Info"}
             </h3>
             <ul className="space-y-4 text-sm text-muted-foreground">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary shrink-0" />
                 <span>
                   {language === "ar"
-                    ? "123 شارع الصيدلة، المنطقة الطبية، القاهرة، مصر"
-                    : "123 Pharmacy Street, Medical District, Cairo, Egypt"}
+                    ? companyInfo?.arabic_address ||
+                      "123 شارع الصيدلة، المنطقة الطبية، القاهرة، مصر"
+                    : companyInfo?.english_address ||
+                      "123 Pharmacy Street, Medical District, Cairo, Egypt"}
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-primary shrink-0" />
-                <span dir="ltr">+20 123 456 7890</span>
+                <span dir="ltr">
+                  {companyInfo?.phone || "+20 123 456 7890"}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-primary shrink-0" />
-                <span>info@bmepharma.com</span>
+                <span>{companyInfo?.email || "info@bmepharma.com"}</span>
               </li>
             </ul>
           </div>
@@ -178,10 +169,7 @@ export function Footer() {
         <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>
             © {currentYear} BME Pharma.{" "}
-            {t("footer.rights") ||
-              (language === "ar"
-                ? "جميع الحقوق محفوظة."
-                : "All rights reserved.")}
+            {language === "ar" ? "جميع الحقوق محفوظة." : "All rights reserved."}
           </p>
           <div className="flex gap-6">
             <Link href="#" className="hover:text-primary transition-colors">

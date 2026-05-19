@@ -1,15 +1,10 @@
-import { CheckoutForm } from "@/components/checkout/checkout-form";
-import { Metadata } from "next";
+import { CheckoutClient } from "./checkout-client";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Checkout | BME Pharma",
-  description: "Complete your purchase securely.",
+  description: "Secure checkout for your BME Pharma order",
 };
 
 export default function CheckoutPage() {
-  return (
-    <div className="container mx-auto py-8">
-      <CheckoutForm />
-    </div>
-  );
+  return <CheckoutClient />;
 }

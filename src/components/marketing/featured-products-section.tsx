@@ -6,17 +6,33 @@ import { Product } from "@/types";
 import { ProductCard } from "./product-card";
 import { useLanguage } from "@/context/language-context";
 import { Button } from "@/components/ui/button";
+import { FeaturedProductsSection as FeaturedProductsSectionType } from "@/generated/prisma/client";
 
 interface FeaturedProductsSectionProps {
   products: Product[];
+  featuredProductsSection?: FeaturedProductsSectionType | null;
 }
 
 export function FeaturedProductsSection({
   products,
+  featuredProductsSection,
 }: FeaturedProductsSectionProps) {
   const { t, language } = useLanguage();
   const isRTL = language === "ar";
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+
+  // Get header and description from database or fall back to translations
+  const header = featuredProductsSection
+    ? language === "ar"
+      ? featuredProductsSection.arabic_header
+      : featuredProductsSection.english_header
+    : null;
+
+  const description = featuredProductsSection
+    ? language === "ar"
+      ? featuredProductsSection.arabic_description
+      : featuredProductsSection.english_description
+    : null;
 
   return (
     <section className="py-16 bg-background">
@@ -24,10 +40,10 @@ export function FeaturedProductsSection({
         <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-10 gap-4">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold tracking-tight mb-4 text-foreground">
-              {t("section.featured")}
+              {header || t("section.featured")}
             </h2>
             <p className="text-muted-foreground text-lg">
-              {t("section.featuredDesc")}
+              {description || t("section.featuredDesc")}
             </p>
           </div>
 

@@ -9,15 +9,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { HeroSlide, type SlideData } from "./hero-slide";
+import { HeroSlide } from "./hero-slide";
 import { useLanguage } from "@/context/language-context";
+import { HeroSlide as HeroSlideType } from "@/generated/prisma/client";
 
 interface HeroSliderProps {
-  slides: SlideData[];
+  slides: HeroSlideType[];
 }
 
 export function HeroSlider({ slides }: HeroSliderProps) {
   const { language } = useLanguage();
+
+  console.log("HeroSlider slides:", slides);
 
   // Carousel direction (ltr/rtl) is handled by the Carousel component via dir prop or context
   // But Shadcn's carousel wraps Embla which supports direction.
@@ -38,9 +41,9 @@ export function HeroSlider({ slides }: HeroSliderProps) {
         className="w-full"
       >
         <CarouselContent>
-          {slides.map((slide) => (
-            <CarouselItem key={slide.id}>
-              <HeroSlide slide={slide} />
+          {slides.map((slide, index) => (
+            <CarouselItem key={`slide-${slide.id}`}>
+              <HeroSlide slide={slide} isFirst={index === 0} />
             </CarouselItem>
           ))}
         </CarouselContent>

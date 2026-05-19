@@ -5,17 +5,11 @@ import Image from "next/image";
 import { useLanguage } from "@/context/language-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-
-export interface Category {
-  id: string;
-  name: { en: string; ar: string };
-  image: string;
-  itemCount?: number;
-  href: string;
-}
+import { Category } from "@/generated/prisma/client";
+import { Product } from "@/generated/prisma/browser";
 
 interface CategoryCardProps {
-  category: Category;
+  category: Category & { products: Product[] };
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
@@ -28,12 +22,18 @@ export function CategoryCard({ category }: CategoryCardProps) {
   };
 
   return (
-    <Link href={category.href} className="group block h-full">
+    <Link
+      href={`/store?category=${category.id}`}
+      className="group block h-full"
+    >
       <Card className="h-full overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 bg-card group-hover:-translate-y-1">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+        <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
           <Image
             src={category.image}
-            alt={getName(category.name)}
+            alt={getName({
+              en: category.english_name ?? "",
+              ar: category.arabic_name ?? "",
+            })}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
@@ -43,11 +43,15 @@ export function CategoryCard({ category }: CategoryCardProps) {
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
-                {getName(category.name)}
+                {getName({
+                  en: category.english_name ?? "",
+                  ar: category.arabic_name ?? "",
+                })}
               </h3>
-              {category.itemCount !== undefined && (
+              {category.products.length !== undefined && (
                 <p className="text-sm text-muted-foreground">
-                  {category.itemCount} {language === "ar" ? "منتج" : "Products"}
+                  {category.products.length}{" "}
+                  {language === "ar" ? "منتج" : "Products"}
                 </p>
               )}
             </div>

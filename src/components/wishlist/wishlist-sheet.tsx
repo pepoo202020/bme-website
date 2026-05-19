@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Trash2, X } from "lucide-react";
+import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -10,7 +10,6 @@ import { useStore } from "@/context/store-context";
 import { useLanguage } from "@/context/language-context";
 import { useCurrency } from "@/context/currency-context";
 import { toast } from "sonner";
-import { useMemo } from "react";
 // We need to fetch product details because wishlist only stores IDs
 // In a real app we'd fetch from API. Here we'll Mock import or filter from a known list.
 // However, allProducts is in page files. We should probably accessible constant.
@@ -25,119 +24,14 @@ import { useMemo } from "react";
 // For now, let's create a partial lookup mock since we have the data in store/page.tsx
 // I will quick-fix by importing a 'getAllProducts' if I create it, or just use a small mock list here matching IDs p1-p12.
 
-// Mock data mirror - effectively a "database"
-const PRODUCTS_DB = [
-  {
-    id: "p1",
-    name: { en: "Premium Vitamin C Serum", ar: "سيروم فيتامين سي الممتاز" },
-    price: 29.99,
-    image:
-      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop",
-    category: "personal-care",
-  },
-  {
-    id: "p2",
-    name: { en: "Advanced Pain Relief Gel", ar: "جل متطور لتخفيف الآلام" },
-    price: 15.5,
-    image:
-      "https://images.unsplash.com/photo-1556228578-8d8442c55e41?q=80&w=800&auto=format&fit=crop",
-    category: "medications",
-  },
-  {
-    id: "p3",
-    name: {
-      en: "Digital Blood Pressure Monitor",
-      ar: "جهاز قياس ضغط الدم الرقمي",
-    },
-    price: 45.0,
-    image:
-      "https://images.unsplash.com/photo-1576091160550-21733e99dbb9?q=80&w=800&auto=format&fit=crop",
-    category: "equipment",
-  },
-  {
-    id: "p4",
-    name: { en: "Organic Herbal Tea", ar: "شاي عشبي عضوي" },
-    price: 12.0,
-    image:
-      "https://images.unsplash.com/photo-1597481499750-3a6b2263caeb?q=80&w=800&auto=format&fit=crop",
-    category: "supplements",
-  },
-  {
-    id: "p5",
-    name: { en: "Daily Multivitamin Complex", ar: "مركب فيتامينات يومي" },
-    price: 24.99,
-    image:
-      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=800&auto=format&fit=crop",
-    category: "supplements",
-  },
-  {
-    id: "p6",
-    name: { en: "Hydrating Face Cream", ar: "كريم مرطب للوجه" },
-    price: 35.0,
-    image:
-      "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?q=80&w=800&auto=format&fit=crop",
-    category: "personal-care",
-  },
-  {
-    id: "p7",
-    name: { en: "Surgical Face Masks (50pcs)", ar: "كمامات جراحية (50 قطعة)" },
-    price: 9.99,
-    image:
-      "https://images.unsplash.com/photo-1583912267652-325203792015?q=80&w=800&auto=format&fit=crop",
-    category: "equipment",
-  },
-  {
-    id: "p8",
-    name: { en: "Electronic Thermometer", ar: "ميزان حرارة إلكتروني" },
-    price: 19.5,
-    image:
-      "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=800&auto=format&fit=crop",
-    category: "equipment",
-  },
-  {
-    id: "p9",
-    name: { en: "Omega 3 Fish Oil", ar: "زيت السمك أوميغا 3" },
-    price: 22.5,
-    image:
-      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=800&auto=format&fit=crop",
-    category: "supplements",
-  },
-  {
-    id: "p10",
-    name: { en: "Wheelchair Standard", ar: "كرسي متحرك قياسي" },
-    price: 150.0,
-    image:
-      "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=800&auto=format&fit=crop",
-    category: "equipment",
-  },
-  {
-    id: "p11",
-    name: { en: "Aloe Vera Gel", ar: "جل الصبار" },
-    price: 8.5,
-    image:
-      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop",
-    category: "personal-care",
-  },
-  {
-    id: "p12",
-    name: { en: "Paracetamol 500mg", ar: "باراسيتامول 500 مجم" },
-    price: 5.0,
-    image:
-      "https://images.unsplash.com/photo-1556228578-8d8442c55e41?q=80&w=800&auto=format&fit=crop",
-    category: "medications",
-  },
-];
+import { Product } from "@/types";
 
 export function WishlistSheet() {
   const { wishlist, toggleWishlist, addToCart, setIsWishlistOpen } = useStore();
   const { t, language } = useLanguage();
   const { formatPrice } = useCurrency();
 
-  const wishlistItems = useMemo(() => {
-    return PRODUCTS_DB.filter((p) => wishlist.includes(p.id));
-  }, [wishlist]);
-
-  const handleAddToCart = (item: any) => {
+  const handleAddToCart = (item: Product) => {
     addToCart(item);
     toast.success(
       language === "ar" ? "تمت الإضافة إلى السلة" : "Added to cart",
@@ -183,7 +77,7 @@ export function WishlistSheet() {
 
       <ScrollArea className="flex-1 -mx-6 px-10 my-4">
         <div className="space-y-6">
-          {wishlistItems.map((item) => (
+          {wishlist.map((item) => (
             <div key={item.id} className="flex gap-4">
               <div className="relative aspect-square w-20 h-20 rounded-lg overflow-hidden border bg-muted shrink-0">
                 <Image
@@ -198,9 +92,21 @@ export function WishlistSheet() {
                   <h4 className="font-medium line-clamp-1">
                     {language === "ar" ? item.name.ar : item.name.en}
                   </h4>
-                  <p className="text-sm font-semibold mt-1">
-                    {formatPrice(item.price)}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm font-semibold text-primary">
+                      {formatPrice(
+                        item.discount
+                          ? item.price - item.price * (item.discount / 100)
+                          : item.price,
+                        item.currency,
+                      )}
+                    </p>
+                    {!!item.discount && item.discount > 0 && (
+                      <p className="text-xs text-muted-foreground line-through">
+                        {formatPrice(item.price, item.currency)}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   <Button
@@ -215,7 +121,7 @@ export function WishlistSheet() {
                     variant="outline"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
-                    onClick={() => toggleWishlist(item.id)}
+                    onClick={() => toggleWishlist(item)}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

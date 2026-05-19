@@ -3,10 +3,10 @@
 import { useLanguage } from "@/context/language-context";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox"; // Kept for potential future use or multi-select
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator"; // If installed, otherwise use <hr />
+import { Separator } from "@/components/ui/separator";
+import type { Category } from "@/generated/prisma/client";
 
 interface StoreFiltersProps {
   selectedCategory: string;
@@ -15,6 +15,7 @@ interface StoreFiltersProps {
   setPriceRange: (range: [number, number]) => void;
   minPrice: number;
   maxPrice: number;
+  categories: Category[];
 }
 
 export function StoreFilters({
@@ -24,24 +25,16 @@ export function StoreFilters({
   setPriceRange,
   minPrice,
   maxPrice,
+  categories,
 }: StoreFiltersProps) {
   const { t, language } = useLanguage();
 
-  const categories = [
+  const allCategories = [
     { id: "all", label: { en: "All Categories", ar: "كل الأقسام" } },
-    { id: "medications", label: { en: "Medications", ar: "الأدوية" } },
-    {
-      id: "equipment",
-      label: { en: "Medical Equipment", ar: "المعدات الطبية" },
-    },
-    {
-      id: "personal-care",
-      label: { en: "Personal Care", ar: "العناية الشخصية" },
-    },
-    {
-      id: "supplements",
-      label: { en: "Supplements", ar: "المكملات الغذائية" },
-    },
+    ...categories.map((cat) => ({
+      id: cat.id.toString(),
+      label: { en: cat.english_name, ar: cat.arabic_name },
+    })),
   ];
 
   return (
@@ -57,7 +50,7 @@ export function StoreFilters({
           onValueChange={setSelectedCategory}
           className="space-y-3"
         >
-          {categories.map((category) => (
+          {allCategories.map((category) => (
             <div
               key={category.id}
               className="flex items-center space-x-2 rtl:space-x-reverse"

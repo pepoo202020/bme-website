@@ -66,6 +66,17 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       ar: "تحقق من أحدث منتجات الرعاية الصحية وأكثرها شهرة.",
     },
     "btn.viewAll": { en: "View All Products", ar: "عرض كل المنتجات" },
+    "store.showing": { en: "Showing", ar: "عرض" },
+    "store.results": { en: "results", ar: "نتائج" },
+    "store.sortBy": { en: "Sort by:", ar: "ترتيب حسب:" },
+    "store.categories": { en: "Categories", ar: "الأقسام" },
+    "store.priceRange": { en: "Price Range", ar: "نطاق السعر" },
+    "store.resetFilters": { en: "Reset Filters", ar: "إعادة تعيين الواجهة" },
+    "store.noProducts": {
+      en: "No products found.",
+      ar: "لم يتم العثور على منتجات.",
+    },
+    "store.filters": { en: "Filters", ar: "تصفيات" },
   };
 
   const t = (key: string) => {
